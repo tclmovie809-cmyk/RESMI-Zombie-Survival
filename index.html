@@ -1,1 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>RESMI: Zombie Survival</title>
 
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:none;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#070b0b;
+  font-family:Arial,Helvetica,sans-serif;
+  color:white;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+}
+
+.screen{
+  position:fixed;
+  inset:0;
+  z-index:50;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  background:
+    radial-gradient(circle,#263c32 0%,#0b1010 55%,#050707 100%);
+}
+
+.hidden{
+  display:none!important;
+}
+
+.logo{
+  font-size:clamp(48px,12vw,100px);
+  font-weight:1000;
+  letter-spacing:7px;
+  color:#8cff75;
+  text-shadow:
+    0 0 8px #8cff75,
+    0 0 30px #29ff00;
+}
+
+.logoSmall{
+  font-size:clamp(18px,4vw,30px);
+  letter-spacing:4px;
+  color:#ddd;
+  margin-top:-5px;
+  margin-bottom:25px;
+}
+
+.tagline{
+  color:#aab6ad;
+  letter-spacing:4px;
+  margin-bottom:35px;
+}
+
+.btn{
+  min-width:210px;
+  padding:15px 28px;
+  margin:7px;
+  border:2px solid #7cff6c;
+  border-radius:12px;
+  background:rgba(25,45,28,.85);
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  box-shadow:0 0 18px rgba(70,255,70,.18);
+}
+
+.btn:active{
+  transform:scale(.95);
+}
+
+.smallBtn{
+  min-width:150px;
+  font-size:15px;
+}
+
+.instructions{
+  max-width:500px;
+  color:#9da9a1;
+  line-height:1.7;
+  margin-top:15px;
+  padding:0 20px;
+}
+
+/* HUD */
+
+#hud{
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:20;
+  display:none;
+  pointer-events:none;
+}
+
+.box{
+  background:rgba(0,0,0,.55);
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;
+  padding:7px 11px;
+  margin-bottom:6px;
+  min-width:155px;
+  backdrop-filter:blur(5px);
+  font-size:14px;
+}
+
+.bar{
+  width:135px;
+  height:9px;
+  border-radius:10px;
+  overflow:hidden;
+  background:#321616;
+  margin-top:5px;
+}
+
+.fill{
+  height:100%;
+  width:100%;
+  transition:.15s;
+}
+
+#hpFill{background:#59ed60}
+#armorFill{background:#55a8ff}
+
+/* SHOP */
+
+#shop{
+  position:fixed;
+  z-index:40;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:min(92%,500px);
+  max-height:90vh;
+  overflow:auto;
+  background:rgba(7,12,11,.96);
+  border:2px solid #72ff65;
+  border-radius:18px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(50,255,50,.15);
+}
+
+#shop h2{
+  color:#7dff70;
+  margin-bottom:5px;
+}
+
+#shopCoins{
+  color:#ffd75e;
+  margin-bottom:15px;
+}
+
+.weapon{
+  border:1px solid #37443b;
+  border-radius:12px;
+  padding:14px;
+  margin:10px 0;
+  text-align:left;
+  background:#101815;
+}
+
+.weapon strong{
+  color:#fff;
+  font-size:18px;
+}
+
+.weapon p{
+  color:#9ca9a0;
+  margin:5px 0;
+  font-size:13px;
+}
+
+.weapon button{
+  width:100%;
+  padding:10px;
+  border:1px solid #70ff68;
+  border-radius:8px;
+  background:#172519;
+  color:white;
+  font-weight:bold;
+}
+
+/* MOBILE */
+
+#mobile{
+  position:fixed;
+  inset:0;
+  z-index:25;
+  display:none;
+  pointer-events:none;
+}
+
+#joy{
+  position:absolute;
+  left:22px;
+  bottom:25px;
+  width:125px;
+  height:125px;
+  border-radius:50%;
+  background:rgba(255,255,255,.07);
+  border:2px solid rgba(255,255,255,.2);
+  pointer-events:auto;
+}
+
+#stick{
+  position:absolute;
+  left:33px;
+  top:33px;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  background:rgba(124,255,108,.65);
+  border:2px solid white;
+}
+
+#fire{
+  position:absolute;
+  right:24px;
+  bottom:30px;
+  width:105px;
+  height:105px;
+  border-radius:50%;
+  border:3px solid #ff6868;
+  background:rgba(140,20,20,.55);
+  color:white;
+  font-weight:bold;
+  font-size:17px;
+  pointer-events:auto;
+}
+
+#reload{
+  position:absolute;
+  right:145px;
+  bottom:45px;
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  border:2px solid #aaa;
+  background:rgba(0,0,0,.5);
+  color:white;
+  font-size:11px;
+  pointer-events:auto;
+}
+
+@media(max-width:800px){
+  #mobile{
+    display:block;
+  }
+}
+
+/* BOSS WARNING */
+
+#warning{
+  position:fixed;
+  z-index:30;
+  top:22%;
+  left:50%;
+  transform:translateX(-50%);
+  color:#ff5555;
+  font-size:clamp(24px,7vw,55px);
+  font-weight:1000;
+  text-shadow:0 0 20px red;
+  display:none;
+  pointer-events:none;
+  animation:pulse .5s infinite alternate;
+}
+
+@keyframes pulse{
+  from{transform:translateX(-50%) scale(1)}
+  to{transform:translateX(-50%) scale(1.05)}
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<!-- MENU -->
+<div id="menu" class="screen">
+  <div class="logo">RESMI</div>
+  <div class="logoSmall">ZOMBIE SURVIVAL</div>
+
+  <div class="tagline">SURVIVE • SHOOT • ESCAPE</div>
+
+  <button class="btn" id="start">START GAME</button>
+  <button class="btn smallBtn" id="how">HOW TO PLAY</button>
+
+  <div id="help" class="instructions hidden">
+    <b>PC:</b> WASD / Arrow Keys to move • Mouse to aim • Click to shoot.<br>
+    <b>Mobile:</b> Left joystick to move • FIRE to shoot.<br><br>
+    Survive as many waves as possible. Collect coins and upgrade your weapons.
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="over" class="screen hidden">
+  <div class="logo" style="color:#ff5555;text-shadow:0 0 25px red">
+    YOU DIED
+  </div>
+
+  <div id="result" style="margin:20px;color:#ddd;font-size:20px"></div>
+
+  <button class="btn" id="again">PLAY AGAIN</button>
+  <button class="btn smallBtn" id="menuBtn">MAIN MENU</button>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+
+  <div class="box">
+    ❤️ HP <span id="hp">100</span>
+    <div class="bar">
+      <div class="fill" id="hpFill"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    🛡️ ARMOR <span id="armor">50</span>
+    <div class="bar">
+      <div class="fill" id="armorFill"></div>
+    </div>
+  </div>
+
+  <div class="box">
+    🎯 SCORE <span id="score">0</span>
+  </div>
+
+  <div class="box">
+    🌊 WAVE <span id="wave">1</span>
+  </div>
+
+  <div class="box">
+    🧟 ZOMBIES <span id="zombies">0</span>
+  </div>
+
+  <div class="box">
+    💰 COINS <span id="coins">0</span>
+  </div>
+
+  <div class="box">
+    🔫 <span id="weaponName">PISTOL</span>
+    <span id="ammo">12/12</span>
+  </div>
+
+  <button class="btn smallBtn" id="shopBtn"
+          style="pointer-events:auto;padding:8px 14px;font-size:13px">
+    SHOP
+  </button>
+</div>
+
+<!-- SHOP -->
+<div id="shop" class="hidden">
+
+  <h2>🔧 WEAPON SHOP</h2>
+  <div id="shopCoins">Coins: 0</div>
+
+  <div class="weapon">
+    <strong>🔫 PISTOL</strong>
+    <p>Balanced weapon • 12 bullets</p>
+    <button onclick="buyWeapon(0)">EQUIP</button>
+  </div>
+
+  <div class="weapon">
+    <strong>⚡ SMG</strong>
+    <p>Fast fire rate • 24 bullets • 80 coins</p>
+    <button onclick="buyWeapon(1)">BUY / EQUIP</button>
+  </div>
+
+  <div class="weapon">
+    <strong>💥 SHOTGUN</strong>
+    <p>Heavy damage • 6 bullets • 150 coins</p>
+    <button onclick="buyWeapon(2)">BUY / EQUIP</button>
+  </div>
+
+  <div class="weapon">
+    <strong>❤️ MEDKIT</strong>
+    <p>Restore 35 HP • 40 coins</p>
+    <button onclick="buyMedkit()">BUY</button>
+  </div>
+
+  <button class="btn smallBtn" onclick="closeShop()">CLOSE</button>
+</div>
+
+<div id="warning">⚠ BOSS INCOMING ⚠</div>
+
+<!-- MOBILE -->
+<div id="mobile">
+
+  <div id="joy">
+    <div id="stick"></div>
+  </div>
+
+  <button id="reload">RELOAD</button>
+
+  <button id="fire">FIRE</button>
+
+</div>
+
+<script>
+/* =========================
+   RESMI ZOMBIE SURVIVAL
+   ========================= */
+
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+
+let W,H;
+
+function resize(){
+  W=canvas.width=innerWidth;
+  H=canvas.height=innerHeight;
+}
+
+addEventListener("resize",resize);
+resize();
+
+/* UI */
+
+const menu=document.getElementById("menu");
+const over=document.getElementById("over");
+const hud=document.getElementById("hud");
+const shop=document.getElementById("shop");
+const warning=document.getElementById("warning");
+
+const hpText=document.getElementById("hp");
+const armorText=document.getElementById("armor");
+const scoreText=document.getElementById("score");
+const waveText=document.getElementById("wave");
+const zombieText=document.getElementById("zombies");
+const coinsText=document.getElementById("coins");
+const ammoText=document.getElementById("ammo");
+const weaponText=document.getElementById("weaponName");
+
+let running=false;
+let score=0;
+let coins=0;
+let wave=1;
+let waveTime=0;
+let spawnTime=0;
+let last=0;
+
+/* INPUT */
+
+const keys={};
+
+addEventListener("keydown",e=>{
+  keys[e.key.toLowerCase()]=true;
+
+  if(e.key.toLowerCase()==="r"){
+    reload();
+  }
+});
+
+addEventListener("keyup",e=>{
+  keys[e.key.toLowerCase()]=false;
+});
+
+let mouseX=W/2;
+let mouseY=H/2;
+let mouseDown=false;
+
+canvas.addEventListener("mousemove",e=>{
+  mouseX=e.clientX;
+  mouseY=e.clientY;
+});
+
+canvas.addEventListener("mousedown",()=>{
+  mouseDown=true;
+});
+
+addEventListener("mouseup",()=>{
+  mouseDown=false;
+});
+
+/* PLAYER */
+
+const player={
+  x:W/2,
+  y:H/2,
+  r:18,
+  speed:245,
+  hp:100,
+  armor:50,
+  angle:0,
+  cooldown:0,
+  ammo:12,
+  maxAmmo:12,
+  weapon:0,
+  weapons:[true,false,false]
+};
+
+/* WEAPONS */
+
+const weapons=[
+  {
+    name:"PISTOL",
+    damage:2,
+    fire:.22,
+    max:12,
+    pellets:1,
+    spread:.02,
+    cost:0
+  },
+  {
+    name:"SMG",
+    damage:1.4,
+    fire:.075,
+    max:24,
+    pellets:1,
+    spread:.07,
+    cost:80
+  },
+  {
+    name:"SHOTGUN",
+    damage:3,
+    fire:.65,
+    max:6,
+    pellets:6,
+    spread:.35,
+    cost:150
+  }
+];
+
+let zombies=[];
+let bullets=[];
+let particles=[];
+let drops=[];
+
+/* MOBILE */
+
+let joyX=0;
+let joyY=0;
+let joyActive=false;
+let mobileFire=false;
+
+const joy=document.getElementById("joy");
+const stick=document.getElementById("stick");
+const fire=document.getElementById("fire");
+const reloadBtn=document.getElementById("reload");
+
+function joyUpdate(t){
+  const r=joy.getBoundingClientRect();
+
+  let x=t.clientX-(r.left+r.width/2);
+  let y=t.clientY-(r.top+r.height/2);
+
+  const max=42;
+  const d=Math.hypot(x,y);
+
+  if(d>max){
+    x=x/d*max;
+    y=y/d*max;
+  }
+
+  joyX=x/max;
+  joyY=y/max;
+
+  stick.style.transform=`translate(${x}px,${y}px)`;
+}
+
+joy.addEventListener("touchstart",e=>{
+  joyActive=true;
+  joyUpdate(e.touches[0]);
+});
+
+joy.addEventListener("touchmove",e=>{
+  e.preventDefault();
+  joyUpdate(e.touches[0]);
+});
+
+joy.addEventListener("touchend",()=>{
+  joyActive=false;
+  joyX=joyY=0;
+  stick.style.transform="translate(0,0)";
+});
+
+fire.addEventListener("touchstart",e=>{
+  e.preventDefault();
+  mobileFire=true;
+});
+
+fire.addEventListener("touchend",()=>{
+  mobileFire=false;
+});
+
+reloadBtn.addEventListener("touchstart",()=>{
+  reload();
+});
+
+/* PARTICLES */
+
+function particle(x,y,color,count=8){
+
+  for(let i=0;i<count;i++){
+
+    particles.push({
+      x,y,
+      vx:(Math.random()-.5)*180,
+      vy:(Math.random()-.5)*180,
+      life:.3+Math.random()*.5,
+      max:.8,
+      size:2+Math.random()*4,
+      color
+    });
+  }
+}
+
+/* START */
+
+document.getElementById("start").onclick=startGame;
+document.getElementById("again").onclick=startGame;
+
+document.getElementById("how").onclick=()=>{
+  document.getElementById("help").classList.toggle("hidden");
+};
+
+document.getElementById("menuBtn").onclick=()=>{
+  over.classList.add("hidden");
+  menu.classList.remove("hidden");
+};
+
+function startGame(){
+
+  menu.classList.add("hidden");
+  over.classList.add("hidden");
+  hud.style.display="block";
+
+  running=true;
+
+  score=0;
+  coins=0;
+  wave=1;
+  waveTime=0;
+  spawnTime=0;
+
+  player.x=W/2;
+  player.y=H/2;
+  player.hp=100;
+  player.armor=50;
+  player.weapon=0;
+  player.ammo=12;
+  player.cooldown=0;
+  player.weapons=[true,false,false];
+
+  zombies=[];
+  bullets=[];
+  particles=[];
+  drops=[];
+
+  last=performance.now();
+
+  requestAnimationFrame(loop);
+}
+
+/* SPAWN */
+
+function spawnZombie(type="normal"){
+
+  let side=Math.floor(Math.random()*4);
+
+  let x,y;
+
+  if(side===0){
+    x=Math.random()*W;
+    y=-50;
+  }
+
+  if(side===1){
+    x=W+50;
+    y=Math.random()*H;
+  }
+
+  if(side===2){
+    x=Math.random()*W;
+    y=H+50;
+  }
+
+  if(side===3){
+    x=-50;
+    y=Math.random()*H;
+  }
+
+  let z={
+    x,y,
+    r:17,
+    hp:2,
+    maxHp:2,
+    speed:55+wave*3,
+    damage:8,
+    type:"normal"
+  };
+
+  if(type==="fast"){
+    z.r=13;
+    z.hp=1;
+    z.maxHp=1;
+    z.speed=110+wave*4;
+    z.damage=6;
+  }
+
+  if(type==="tank"){
+    z.r=27;
+    z.hp=8+wave;
+    z.maxHp=z.hp;
+    z.speed=30+wave*2;
+    z.damage=15;
+  }
+
+  if(type==="boss"){
+
+    z.r=48;
+    z.hp=80+wave*15;
+    z.maxHp=z.hp;
+    z.speed=25+wave;
+    z.damage=25;
+    z.type="boss";
+  }
+
+  zombies.push(z);
+}
+
+/* SHOOT */
+
+function shoot(){
+
+  if(player.cooldown>0)return;
+
+  const gun=weapons[player.weapon];
+
+  if(player.ammo<=0){
+    reload();
+    return;
+  }
+
+  player.cooldown=gun.fire;
+  player.ammo--;
+
+  const base=player.angle;
+
+  for(let i=0;i<gun.pellets;i++){
+
+    const a=
+      base+
+      (Math.random()-.5)*gun.spread;
+
+    bullets.push({
+      x:player.x+Math.cos(a)*25,
+      y:player.y+Math.sin(a)*25,
+      vx:Math.cos(a)*720,
+      vy:Math.sin(a)*720,
+      r:4,
+      damage:gun.damage,
+      life:1
+    });
+  }
+
+  particle(
+    player.x+Math.cos(base)*27,
+    player.y+Math.sin(base)*27,
+    "#ffe36b",
+    4
+  );
+}
+
+/* RELOAD */
+
+function reload(){
+
+  const gun=weapons[player.weapon];
+
+  player.ammo=gun.max;
+}
+
+/* DAMAGE */
+
+function damagePlayer(amount){
+
+  if(player.armor>0){
+
+    const absorbed=Math.min(
+      player.armor,
+      amount*.65
+    );
+
+    player.armor-=absorbed;
+    amount-=absorbed;
+  }
+
+  player.hp-=amount;
+
+  if(player.hp<=0){
+    player.hp=0;
+    endGame();
+  }
+}
+
+/* UPDATE */
+
+function update(dt){
+
+  player.cooldown-=dt;
+
+  /* MOVEMENT */
+
+  let dx=0,dy=0;
+
+  if(keys["w"]||keys["arrowup"])dy--;
+  if(keys["s"]||keys["arrowdown"])dy++;
+  if(keys["a"]||keys["arrowleft"])dx--;
+  if(keys["d"]||keys["arrowright"])dx++;
+
+  if(joyActive){
+    dx=joyX;
+    dy=joyY;
+  }
+
+  const d=Math.hypot(dx,dy);
+
+  if(d>0){
+
+    dx/=d;
+    dy/=d;
+
+    player.x+=dx*player.speed*dt;
+    player.y+=dy*player.speed*dt;
+  }
+
+  player.x=Math.max(20,Math.min(W-20,player.x));
+  player.y=Math.max(20,Math.min(H-20,player.y));
+
+  /* AIM */
+
+  player.angle=Math.atan2(
+    mouseY-player.y,
+    mouseX-player.x
+  );
+
+  if(mouseDown||mobileFire){
+    shoot();
+  }
+
+  /* BULLETS */
+
+  for(let i=bullets.length-1;i>=0;i--){
+
+    const b=bullets[i];
+
+    b.x+=b.vx*dt;
+    b.y+=b.vy*dt;
+    b.life-=dt;
+
+    if(
+      b.life<=0||
+      b.x<-80||b.x>W+80||
+      b.y<-80||b.y>H+80
+    ){
+      bullets.splice(i,1);
+    }
+  }
+
+  /* ZOMBIES */
+
+  for(let i=zombies.length-1;i>=0;i--){
+
+    const z=zombies[i];
+
+    const a=Math.atan2(
+      player.y-z.y,
+      player.x-z.x
+    );
+
+    z.x+=Math.cos(a)*z.speed*dt;
+    z.y+=Math.sin(a)*z.speed*dt;
+
+    const dist=Math.hypot(
+      player.x-z.x,
+      player.y-z.y
+    );
+
+    if(dist<player.r+z.r){
+
+      damagePlayer(z.damage*dt);
+
+      z.x-=Math.cos(a)*z.speed*dt*1.4;
+      z.y-=Math.sin(a)*z.speed*dt*1.4;
+    }
+
+    /* BULLET HIT */
+
+    for(let j=bullets.length-1;j>=0;j--){
+
+      const b=bullets[j];
+
+      if(
+        Math.hypot(
+          b.x-z.x,
+          b.y-z.y
+        )<b.r+z.r
+      ){
+
+        z.hp-=b.damage;
+        bullets.splice(j,1);
+
+        particle(
+          z.x,
+          z.y,
+          z.type==="boss"?"#ff5555":"#83ff72",
+          5
+        );
+
+        if(z.hp<=0){
+
+          killZombie(z);
+          zombies.splice(i,1);
+        }
+
+        break;
+      }
+    }
+  }
+
+  /* SPAWN */
+
+  spawnTime-=dt;
+
+  const rate=Math.max(
+    .18,
+    1.05-wave*.045
+  );
+
+  if(spawnTime<=0){
+
+    let type="normal";
+
+    const r=Math.random();
+
+    if(wave>=3&&r<.17)type="fast";
+    if(wave>=5&&r<.09)type="tank";
+
+    spawnZombie(type);
+
+    spawnTime=rate;
+  }
+
+  /* WAVE */
+
+  waveTime+=dt;
+
+  if(waveTime>=25){
+
+    wave++;
+    waveTime=0;
+
+    if(wave%5===0){
+      spawnBoss();
+    }
+
+    particle(
+      player.x,
+      player.y,
+      "#7dff70",
+      30
+    );
+  }
+
+  /* DROPS */
+
+  for(let i=drops.length-1;i>=0;i--){
+
+    const p=drops[i];
+
+    p.life-=dt;
+
+    if(
+      Math.hypot(
+        player.x-p.x,
+        player.y-p.y
+      )<30
+    ){
+
+      if(p.type==="coin"){
+        coins+=p.amount;
+      }
+
+      if(p.type==="med"){
+        player.hp=Math.min(
+          100,
+          player.hp+25
+        );
+      }
+
+      drops.splice(i,1);
+    }
+
+    if(p.life<=0){
+      drops.splice(i,1);
+    }
+  }
+
+  /* PARTICLES */
+
+  for(let i=particles.length-1;i>=0;i--){
+
+    const p=particles[i];
+
+    p.x+=p.vx*dt;
+    p.y+=p.vy*dt;
+
+    p.vx*=.96;
+    p.vy*=.96;
+
+    p.life-=dt;
+
+    if(p.life<=0){
+      particles.splice(i,1);
+    }
+  }
+
+  /* HUD */
+
+  hpText.textContent=Math.ceil(player.hp);
+  armorText.textContent=Math.ceil(player.armor);
+  scoreText.textContent=score;
+  waveText.textContent=wave;
+  zombieText.textContent=zombies.length;
+  coinsText.textContent=coins;
+
+  hpFill.style.width=player.hp+"%";
+  armorFill.style.width=Math.min(
+    100,
+    player.armor*2
+  )+"%";
+
+  ammoText.textContent=
+    player.ammo+"/"+weapons[player.weapon].max;
+
+  weaponText.textContent=
+    weapons[player.weapon].name;
+}
+
+/* BOSS */
+
+function spawnBoss(){
+
+  spawnZombie("boss");
+
+  warning.style.display="block";
+
+  setTimeout(()=>{
+    warning.style.display="none";
+  },3000);
+}
+
+/* KILL */
+
+function killZombie(z){
+
+  let value=10;
+
+  if(z.type==="fast")value=15;
+  if(z.type==="tank")value=30;
+
+  if(z.type==="boss"){
+    value=200;
+    coins+=100;
+  }
+
+  score+=value;
+
+  coins+=z.type==="boss"?100:Math.floor(Math.random()*4)+1;
+
+  particle(
+    z.x,
+    z.y,
+    z.type==="boss"?"#ff3030":"#75ff6b",
+    z.type==="boss"?35:15
+  );
+
+  if(Math.random()<.12){
+    drops.push({
+      x:z.x,
+      y:z.y,
+      type:"med",
+      life:12
+    });
+  }
+
+  if(Math.random()<.25){
+    drops.push({
+      x:z.x,
+      y:z.y,
+      type:"coin",
+      amount:5+Math.floor(Math.random()*10),
+      life:12
+    });
+  }
+}
+
+/* DRAW */
+
+function draw(){
+
+  /* BACKGROUND */
+
+  ctx.fillStyle="#0c1413";
+  ctx.fillRect(0,0,W,H);
+
+  /* NIGHT GRADIENT */
+
+  const g=ctx.createRadialGradient(
+    player.x,
+    player.y,
+    50,
+    player.x,
+    player.y,
+    Math.max(W,H)
+  );
+
+  g.addColorStop(0,"rgba(50,90,65,.20)");
+  g.addColorStop(1,"rgba(0,0,0,.50)");
+
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,W,H);
+
+  /* GRID */
+
+  ctx.strokeStyle="rgba(150,255,160,.035)";
+  ctx.lineWidth=1;
+
+  for(let x=0;x<W;x+=50){
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,H);
+    ctx.stroke();
+  }
+
+  for(let y=0;y<H;y+=50){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(W,y);
+    ctx.stroke();
+  }
+
+  /* DROPS */
+
+  for(const p of drops){
+
+    ctx.save();
+    ctx.translate(p.x,p.y);
+
+    ctx.beginPath();
+    ctx.arc(
+      0,0,
+      11,
+      0,
+      Math.PI*2
+    );
+
+    ctx.fillStyle=
+      p.type==="coin"?"#ffd54d":"#ff5757";
+
+    ctx.shadowBlur=15;
+    ctx.shadowColor=ctx.fillStyle;
+    ctx.fill();
+
+    ctx.shadowBlur=0;
+
+    ctx.fillStyle="#111";
+    ctx.font="bold 12px Arial";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(
+      p.type==="coin"?"$":"+",
+      0,0
+    );
+
+    ctx.restore();
+  }
+
+  /* BULLETS */
+
+  for(const b of bullets){
+
+    ctx.beginPath();
+    ctx.arc(
+      b.x,b.y,b.r,
+      0,Math.PI*2
+    );
+
+    ctx.fillStyle="#ffe16a";
+    ctx.shadowBlur=12;
+    ctx.shadowColor="#ffe16a";
+    ctx.fill();
+    ctx.shadowBlur=0;
+  }
+
+  /* ZOMBIES */
+
+  for(const z of zombies){
+
+    ctx.save();
+    ctx.translate(z.x,z.y);
+
+    /* shadow */
+
+    ctx.beginPath();
+    ctx.ellipse(
+      0,
+      z.r*.9,
+      z.r*1.2,
+      z.r*.45,
+      0,0,Math.PI*2
+    );
+
+    ctx.fillStyle="rgba(0,0,0,.5)";
+    ctx.fill();
+
+    /* body */
+
+    let color="#588b55";
+
+    if(z.type==="fast")color="#9b7448";
+    if(z.type==="tank")color="#4c5559";
+    if(z.type==="boss")color="#6b3030";
+
+    ctx.beginPath();
+    ctx.arc(
+      0,0,
+      z.r,
+      0,Math.PI*2
+    );
+
+    ctx.fillStyle=color;
+    ctx.fill();
+
+    ctx.strokeStyle=
+      z.type==="boss"?"#ff4d4d":"#18291d";
+
+    ctx.lineWidth=z.type==="boss"?5:3;
+    ctx.stroke();
+
+    /* eyes */
+
+    ctx.fillStyle="#ff3b3b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+      -z.r*.35,
+      -z.r*.18,
+      Math.max(3,z.r*.12),
+      0,Math.PI*2
+    );
+
+    ctx.arc(
+      z.r*.35,
+      -z.r*.18,
+      Math.max(3,z.r*.12),
+      0,Math.PI*2
+    );
+
+    ctx.fill();
+
+    /* mouth */
+
+    ctx.strokeStyle="#151b15";
+    ctx.lineWidth=3;
+
+    ctx.beginPath();
+    ctx.moveTo(-z.r*.35,z.r*.35);
+    ctx.lineTo(z.r*.35,z.r*.35);
+    ctx.stroke();
+
+    /* HP BAR */
+
+    if(z.type!=="normal"||z.hp<z.maxHp){
+
+      ctx.fillStyle="#351616";
+      ctx.fillRect(
+        -z.r,
+        -z.r-10,
+        z.r*2,
+        5
+      );
+
+      ctx.fillStyle=
+        z.type==="boss"?"#ff4444":"#6dff65";
+
+      ctx.fillRect(
+        -z.r,
+        -z.r-10,
+        z.r*2*(z.hp/z.maxHp),
+        5
+      );
+    }
+
+    ctx.restore();
+  }
+
+  /* PLAYER */
+
+  ctx.save();
+
+  ctx.translate(
+    player.x,
+    player.y
+  );
+
+  ctx.rotate(player.angle);
+
+  /* shadow */
+
+  ctx.beginPath();
+  ctx.ellipse(
+    0,16,
+    24,10,
+    0,0,Math.PI*2
+  );
+
+  ctx.fillStyle="rgba(0,0,0,.5)";
+  ctx.fill();
+
+  /* body */
+
+  ctx.beginPath();
+  ctx.arc(
+    0,0,
+    player.r,
+    0,Math.PI*2
+  );
+
+  ctx.fillStyle="#4e88ff";
+  ctx.fill();
+
+  ctx.strokeStyle="#c5d7ff";
+  ctx.lineWidth=3;
+  ctx.stroke();
+
+  /* gun */
+
+  ctx.fillStyle="#333";
+  ctx.fillRect(
+    8,-5,
+    player.weapon===2?38:30,
+    10
+  );
+
+  ctx.fillStyle="#111";
+  ctx.fillRect(
+    player.weapon===2?38:30,
+    -4,
+    10,
+    8
+  );
+
+  ctx.restore();
+
+  /* PARTICLES */
+
+  for(const p of particles){
+
+    ctx.globalAlpha=
+      Math.max(0,p.life/p.max);
+
+    ctx.fillStyle=p.color;
+
+    ctx.beginPath();
+    ctx.arc(
+      p.x,p.y,
+      p.size,
+      0,Math.PI*2
+    );
+
+    ctx.fill();
+  }
+
+  ctx.globalAlpha=1;
+
+  /* CROSSHAIR */
+
+  if(innerWidth>800&&running){
+
+    ctx.strokeStyle="rgba(255,255,255,.7)";
+    ctx.lineWidth=1;
+
+    ctx.beginPath();
+    ctx.arc(
+      mouseX,
+      mouseY,
+      10,
+      0,Math.PI*2
+    );
+    ctx.stroke();
+
+    ctx.beginPath();
+
+    ctx.moveTo(mouseX-16,mouseY);
+    ctx.lineTo(mouseX+16,mouseY);
+
+    ctx.moveTo(mouseX,mouseY-16);
+    ctx.lineTo(mouseX,mouseY+16);
+
+    ctx.stroke();
+  }
+}
+
+/* LOOP */
+
+function loop(t){
+
+  if(!running)return;
+
+  const dt=Math.min(
+    (t-last)/1000,
+    .033
+  );
+
+  last=t;
+
+  update(dt);
+  draw();
+
+  if(running){
+    requestAnimationFrame(loop);
+  }
+}
+
+/* GAME OVER */
+
+function endGame(){
+
+  if(!running)return;
+
+  running=false;
+
+  hud.style.display="none";
+
+  result.innerHTML=
+    `Score: <b>${score}</b><br>
+     Wave reached: <b>${wave}</b><br>
+     Coins collected: <b>${coins}</b>`;
+
+  over.classList.remove("hidden");
+}
+
+/* SHOP */
+
+document.getElementById("shopBtn").onclick=()=>{
+  if(!running)return;
+
+  shop.classList.remove("hidden");
+  updateShop();
+};
+
+function updateShop(){
+  document.getElementById("shopCoins").textContent=
+    "Coins: "+coins;
+}
+
+function closeShop(){
+  shop.classList.add("hidden");
+}
+
+function buyWeapon(id){
+
+  if(id===0){
+
+    player.weapon=0;
+    player.ammo=weapons[0].max;
+
+    updateShop();
+    return;
+  }
+
+  const gun=weapons[id];
+
+  if(player.weapons[id]){
+    player.weapon=id;
+    player.ammo=gun.max;
+    updateShop();
+    return;
+  }
+
+  if(coins>=gun.cost){
+
+    coins-=gun.cost;
+    player.weapons[id]=true;
+    player.weapon=id;
+    player.ammo=gun.max;
+
+    updateShop();
+  }else{
+    alert("Not enough coins!");
+  }
+}
+
+function buyMedkit(){
+
+  if(coins>=40){
+
+    coins-=40;
+
+    player.hp=Math.min(
+      100,
+      player.hp+35
+    );
+
+    updateShop();
+
+  }else{
+    alert("Not enough coins!");
+  }
+}
+
+/* INITIAL DRAW */
+
+draw();
+</script>
+
+</body>
+</html>
